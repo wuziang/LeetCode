@@ -1,6 +1,6 @@
 # LeetCode
 
-Accepted Submissions to Top Interview Questions
+Accepted Submissions to Top Liked/Interviewed Questions
 
 ## 1. Two Sum
 Related Topics: Array, Hash Table
@@ -731,6 +731,78 @@ public:
 };
 ```
 
+## 31. Next Permutation
+Related Topics: Array
+
+```cpp
+class Solution {
+public:
+    void nextPermutation(vector<int>& nums) {
+        int i=(int)nums.size()-2;
+        
+        while(i>=0){
+            if(nums[i]<nums[i+1]) break;
+            i--;
+        }
+        
+        if(i>=0){
+            int j=(int)nums.size()-1;
+            
+            while(j>=0){
+                if(nums[j]>nums[i]) break;
+                j--;
+            }
+            
+            swap(nums[i], nums[j]);
+        }
+        reverse(nums, i+1);
+    }
+    
+private:
+    void reverse(vector<int>& nums, int start){
+        int i=start, j=(int)nums.size()-1;
+        while(i<j){
+            swap(nums[i], nums[j]);
+            i++;
+            j--;
+        }
+    }
+};
+```
+
+## 32. Longest Valid Parentheses
+Related Topics: String, Dynamic Programming
+
+```cpp
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        int result=0;
+        
+        int n=(int)s.size();
+        vector<int> dp(n,0);
+        
+        for(int i=1;i<n;i++){
+            if(s[i]==')'){
+                if(s[i-1]=='('){
+                    dp[i]=2+(i>=2?dp[i-2]:0);
+                }
+                else{
+                    int j=i-dp[i-1];
+                    if(j>0 && s[j-1]=='('){
+                        dp[i]=2+dp[i-1]+(j>=2?dp[j-2]:0);
+                    }
+                }
+                
+                result=max(dp[i],result);
+            }
+        }
+        
+        return result;
+    }
+};
+```
+
 ## 33. Search in Rotated Sorted Array
 Related Topics: Array, Binary Search
 
@@ -857,6 +929,47 @@ public:
             }
             
             return result;
+        }
+    }
+};
+```
+
+## 39. Combination Sum
+Related Topics: Array, Backtracking
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        vector<vector<int>> result;
+        sort(candidates.begin(), candidates.end(), greater<int>());
+        
+        int i=0;
+        while(i<candidates.size()){
+            if(candidates[i]<=target) break;
+            i++;
+        }
+        
+        combinationSum(result, vector<int>(), candidates, i, target);
+        return result;
+    }
+    
+private:
+    void combinationSum(vector<vector<int>>& result, vector<int> combination, vector<int>& candidates, int start, int target){
+        if(start>candidates.size()-1) return;
+        
+        if(target==0){
+            result.push_back(combination);
+            return;
+        }
+        else{
+            for(int i=start;i<candidates.size();i++){
+                if(candidates[i]<=target){
+                    combination.push_back(candidates[i]);
+                    combinationSum(result, combination, candidates, i, target-candidates[i]);
+                    combination.pop_back();
+                }
+            }
         }
     }
 };
@@ -1224,6 +1337,38 @@ public:
 };
 ```
 
+## 64. Minimum Path Sum
+Related Topics: Array, Dynamic Programming
+
+```cpp
+class Solution {
+public:
+    int minPathSum(vector<vector<int>>& grid) {
+        int m=(int)grid.size(), n=(int)grid[0].size();
+        vector<vector<int>> dp(m, vector<int>(n));
+        
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                if(i==0 && j==0){
+                    dp[i][j]=grid[i][j];
+                }
+                else if(i==0){
+                    dp[i][j]=grid[i][j]+dp[i][j-1];
+                }
+                else if(j==0){
+                    dp[i][j]=grid[i][j]+dp[i-1][j];
+                }
+                else{
+                    dp[i][j]=grid[i][j]+min(dp[i-1][j], dp[i][j-1]);
+                }
+            }
+        }
+        
+        return dp[m-1][n-1];
+    }
+};
+```
+
 ## 66. Plus One
 Related Topics: Array
 
@@ -1300,6 +1445,40 @@ public:
         }
         
         return b;
+    }
+};
+```
+
+## 72. Edit Distance
+Related Topics: String, Dynamic Programming
+
+```cpp
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int m=(int)word1.size(), n=(int)word2.size();
+        vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
+        
+        for(int i=1;i<=m;i++){
+            dp[i][0]=i;
+        }
+        
+        for(int j=1;j<=n;j++){
+            dp[0][j]=j;
+        }
+        
+        for(int i=1;i<=m;i++){
+            for(int j=1;j<=n;j++){
+                if(word1[i-1]==word2[j-1]){
+                    dp[i][j]=dp[i-1][j-1];
+                }
+                else{
+                    dp[i][j]=min(dp[i-1][j-1], min(dp[i-1][j], dp[i][j-1]))+1;
+                }
+            }
+        }
+        
+        return dp[m][n];
     }
 };
 ```
@@ -1495,6 +1674,45 @@ public:
 };
 ```
 
+## 85. Maximal Rectangle
+Related Topics: Array, Hash Table, Dynamic Programming, Stack
+
+```cpp
+class Solution {
+public:
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        if(matrix.empty() || matrix[0].empty()) return 0;
+        
+        int m=(int)matrix.size(), n=(int)matrix[0].size();
+        vector<vector<int>> dp(m+1, vector<int>(n, 0));
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                if(matrix[i][j]=='1')
+                    dp[i][j]=(j>0?dp[i][j-1]:0)+1;
+            }
+        }
+        
+        int result=0;
+        for(int j=0;j<n;j++){
+            stack<int> s;
+            for(int i=0;i<=m;i++){
+                while(!s.empty() && dp[s.top()][j]>=dp[i][j]){
+                    int length=dp[s.top()][j];
+                    s.pop();
+                    
+                    int width=i-(!s.empty()?s.top()+1:0);
+                    result=max(length*width, result);
+                }
+                s.push(i);
+            }
+
+        }
+        
+        return result;
+    }
+};
+```
+
 ## 88. Merge Sorted Array
 Related Topics: Array, Two Pointers
 
@@ -1608,6 +1826,28 @@ public:
         }
         
         return result;
+    }
+};
+```
+
+## 96. Unique Binary Search Trees
+Related Topics: Dynamic Programming, Tree
+
+```cpp
+class Solution {
+public:
+    int numTrees(int n) {
+        vector<int> dp(n+1, 1);
+        
+        for(int i=1;i<=n;i++){
+            int m=0;
+            for(int j=1;j<=i;j++){
+                m+=dp[j-1]*dp[i-j];
+            }
+            dp[i]=m;
+        }
+        
+        return dp[n];
     }
 };
 ```
@@ -1987,6 +2227,50 @@ private:
         
         return root;
     }
+```
+
+## 114. Flatten Binary Tree to Linked List
+Related Topics: Tree, Depth-first Search
+
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        if(root==nullptr) return;
+        
+        TreeNode *cur=root;
+        stack<TreeNode*> s;
+        
+        while(cur!=nullptr){
+            if(cur->right!=nullptr){
+                s.push(cur->right);
+                cur->right=nullptr;
+            }
+
+            if(cur->left!=nullptr){
+                cur->right=cur->left;
+                cur->left=nullptr;
+            }
+            else if(!s.empty()){
+                cur->right=s.top();
+                s.pop();
+            }
+
+            cur=cur->right;
+        }
+    }
+};
 ```
 
 ## 116. Populating Next Right Pointers in Each Node
@@ -2510,6 +2794,48 @@ public:
         }
         
         return false;
+    }
+};
+```
+
+## 142. Linked List Cycle II
+Related Topics: Linked List, Two Pointers
+
+```cpp
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode *detectCycle(ListNode *head) {
+        if(head==nullptr) return head;
+        
+        ListNode *fast=head, *slow=head;
+        bool hasCycle=false;
+        while(fast->next!=nullptr && fast->next->next!=nullptr){
+            fast=fast->next->next;
+            slow=slow->next;
+            
+            if(fast==slow){
+                hasCycle=true;
+                break;
+            }
+        }
+        
+        if(!hasCycle) return nullptr;
+        
+        fast=head;
+        while(fast!=slow){
+            fast=fast->next;
+            slow=slow->next;
+        }
+
+        return fast;
     }
 };
 ```
@@ -3060,6 +3386,48 @@ public:
                 dp[i]=nums[i]+max(dp[i-2], dp[i-3]);
             
             result=max(result,dp[i]);
+        }
+        
+        return result;
+    }
+};
+```
+
+## 199. Binary Tree Right Side View
+Related Topics: Tree, Depth-first Search, Breath-first Search, Recursion, Queue
+
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        vector<int> result;
+        if(root==nullptr) return result;
+        
+        deque<TreeNode*> q;
+        q.push_back(root);
+        
+        while(!q.empty()){
+            int n=(int)q.size();
+            result.push_back(q.back()->val);
+            
+            for(int i=0;i<n;i++){
+                TreeNode* temp=q.front();
+                q.pop_front();
+                
+                if(temp->left!=nullptr) q.push_back(temp->left);
+                if(temp->right!=nullptr) q.push_back(temp->right);
+            }
         }
         
         return result;
